@@ -1,8 +1,12 @@
+import NavigationBar from "./components/Navigation";
+import Routes from "./routes";
+
 function App() {
   return (
-    <div>
-      Hello World!
-    </div>
+    <>
+      <NavigationBar />
+      <Routes />
+    </>
   );
 }
 
