@@ -1,9 +1,9 @@
-import { TPlayer, TPlayerType } from "../types";
+import { EPlayerType, TPlayer } from "../types/players";
 
 import players from './players.json';
 
 const getPlayers = (args?: {
-  type?: TPlayerType;
+  type?: EPlayerType;
 }): Promise<TPlayer[]> => {
   return Promise.resolve<TPlayer[]>(
     (players as TPlayer[])

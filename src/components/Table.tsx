@@ -3,7 +3,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import MaterialUITable from "@mui/material/Table";
 import Paper from "@mui/material/Paper";
-import { TPlayer } from "../types";
+import { TPlayer } from "../types/players";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
@@ -11,6 +11,7 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import { playerTypeMap } from "../utils/constants";
 import { visuallyHidden } from "@mui/utils";
 
 function descendingComparator(a: TPlayer, b: TPlayer, orderBy: keyof TPlayer) {
@@ -200,7 +201,7 @@ const Table: React.FC<ITable> = ({ rows }) => {
                     <TableCell component="th" id={labelId} scope="row">
                       {row.name}
                     </TableCell>
-                    <TableCell align="left">{row.type}</TableCell>
+                    <TableCell align="left">{playerTypeMap[row.type]}</TableCell>
                     <TableCell align="right">{row.points}</TableCell>
                     <TableCell align="right">{row.rank}</TableCell>
                     <TableCell align="right">{row.dob}</TableCell>

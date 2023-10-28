@@ -11,7 +11,6 @@ import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
 type Page = {
@@ -118,7 +117,7 @@ function NavigationBar() {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map(({ pageName, link }) => (
-              <Link to={link}>
+              <Link to={link} key={pageName}>
                 <Button
                   key={pageName}
                   onClick={handleCloseNavMenu}
