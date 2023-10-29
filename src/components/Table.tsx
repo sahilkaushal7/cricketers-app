@@ -1,8 +1,10 @@
 import * as React from "react";
 
 import Box from "@mui/material/Box";
+import { Link } from "@mui/material";
 import MaterialUITable from "@mui/material/Table";
 import Paper from "@mui/material/Paper";
+import { Link as RouterLink } from "react-router-dom";
 import { TPlayer } from "../types/players";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -200,9 +202,13 @@ const Table: React.FC<ITable> = ({ rows }) => {
                 return (
                   <TableRow hover tabIndex={-1} key={row.id}>
                     <TableCell component="th" id={labelId} scope="row">
-                      {row.name}
+                      <RouterLink to={`/players/${row.id}`}>
+                        <Link>{row.name}</Link>
+                      </RouterLink>
                     </TableCell>
-                    <TableCell align="left">{playerTypeMap[row.type]}</TableCell>
+                    <TableCell align="left">
+                      {playerTypeMap[row.type]}
+                    </TableCell>
                     <TableCell align="right">{row.points}</TableCell>
                     <TableCell align="right">{row.rank}</TableCell>
                     <TableCell align="right">{getAge(row.dob)}</TableCell>

@@ -82,7 +82,6 @@ const PlayersList: React.FC = () => {
           <Filter type={filters.type} setType={setType} />
         </Grid>
       </Grid>
-
       <Table rows={players} />
     </Box>
   );
