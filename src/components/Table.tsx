@@ -1,7 +1,6 @@
 import * as React from "react";
 
 import Box from "@mui/material/Box";
-import { Link } from "@mui/material";
 import MaterialUITable from "@mui/material/Table";
 import Paper from "@mui/material/Paper";
 import { Link as RouterLink } from "react-router-dom";
@@ -38,10 +37,6 @@ function getComparator<Key extends keyof TPlayer>(
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
-// stableSort() brings sort stability to non-modern browsers (notably IE11). If you
-// only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
-// with exampleArray.slice().sort(exampleComparator)
 function stableSort(
   array: readonly TPlayer[],
   comparator: (a: TPlayer, b: TPlayer) => number
@@ -59,39 +54,11 @@ function stableSort(
   return stabilizedThis.map((el) => el[0]);
 }
 
-interface HeadCell {
+export interface HeadCell {
   id: keyof TPlayer;
   label: string;
   numeric: boolean;
 }
-
-const headCells: readonly HeadCell[] = [
-  {
-    id: "name",
-    numeric: false,
-    label: "Name",
-  },
-  {
-    id: "type",
-    numeric: false,
-    label: "Type",
-  },
-  {
-    id: "points",
-    numeric: true,
-    label: "Points",
-  },
-  {
-    id: "rank",
-    numeric: true,
-    label: "Rank",
-  },
-  {
-    id: "dob",
-    numeric: true,
-    label: "Age",
-  },
-];
 
 interface EnhancedTableProps {
   onRequestSort: (
@@ -100,9 +67,10 @@ interface EnhancedTableProps {
   ) => void;
   order: Order;
   orderBy: string;
+  headCells: readonly HeadCell[];
 }
 
-function EnhancedTableHead(props: EnhancedTableProps) {
+const EnhancedTableHead = (props: EnhancedTableProps) => {
   const { order, orderBy, onRequestSort } = props;
   const createSortHandler =
     (property: keyof TPlayer) => (event: React.MouseEvent<unknown>) => {
@@ -112,7 +80,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   return (
     <TableHead>
       <TableRow>
-        {headCells.map((headCell) => (
+        {props.headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
@@ -136,26 +104,34 @@ function EnhancedTableHead(props: EnhancedTableProps) {
       </TableRow>
     </TableHead>
   );
-}
+};
 
 interface ITable {
   rows: TPlayer[];
+  headCells: readonly HeadCell[];
+  selectRow?: (player: TPlayer) => void;
+  defaultRowsPerPage?: number;
 }
 
-const Table: React.FC<ITable> = ({ rows }) => {
+const Table: React.FC<ITable> = ({
+  rows,
+  headCells,
+  selectRow,
+  defaultRowsPerPage = 10,
+}) => {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof TPlayer>("name");
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(defaultRowsPerPage);
 
-  const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
-    property: keyof TPlayer
-  ) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  };
+  const handleRequestSort = React.useCallback(
+    (event: React.MouseEvent<unknown>, property: keyof TPlayer) => {
+      const isAsc = orderBy === property && order === "asc";
+      setOrder(isAsc ? "desc" : "asc");
+      setOrderBy(property);
+    },
+    [order, orderBy]
+  );
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -168,9 +144,10 @@ const Table: React.FC<ITable> = ({ rows }) => {
     setPage(0);
   };
 
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  const emptyRows = React.useMemo(
+    () => (page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0),
+    [page, rows.length, rowsPerPage]
+  );
 
   const visibleRows = React.useMemo(
     () =>
@@ -181,8 +158,10 @@ const Table: React.FC<ITable> = ({ rows }) => {
     [order, orderBy, page, rows, rowsPerPage]
   );
 
+  const availableCells = new Set(headCells.map(({ id }) => id));
+
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box width="100%">
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
           <MaterialUITable
@@ -194,6 +173,7 @@ const Table: React.FC<ITable> = ({ rows }) => {
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
+              headCells={headCells}
             />
             <TableBody>
               {visibleRows.map((row, index) => {
@@ -201,17 +181,37 @@ const Table: React.FC<ITable> = ({ rows }) => {
 
                 return (
                   <TableRow hover tabIndex={-1} key={row.id}>
-                    <TableCell component="th" id={labelId} scope="row">
-                      <RouterLink to={`/players/${row.id}`}>
-                        <Link>{row.name}</Link>
-                      </RouterLink>
-                    </TableCell>
-                    <TableCell align="left">
-                      {playerTypeMap[row.type]}
-                    </TableCell>
-                    <TableCell align="right">{row.points}</TableCell>
-                    <TableCell align="right">{row.rank}</TableCell>
-                    <TableCell align="right">{getAge(row.dob)}</TableCell>
+                    {selectRow ? (
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        onClick={() => selectRow(row)}
+                      >
+                        <RouterLink to={`/players/${row.id}`}>
+                          {row.name}
+                        </RouterLink>
+                      </TableCell>
+                    ) : (
+                      <TableCell component="th" id={labelId} scope="row">
+                        {row.name}
+                      </TableCell>
+                    )}
+
+                    {availableCells.has("type") && (
+                      <TableCell align="left">
+                        {playerTypeMap[row.type]}
+                      </TableCell>
+                    )}
+                    {availableCells.has("points") && (
+                      <TableCell align="right">{row.points}</TableCell>
+                    )}
+                    {availableCells.has("rank") && (
+                      <TableCell align="right">{row.rank}</TableCell>
+                    )}
+                    {availableCells.has("dob") && (
+                      <TableCell align="right">{getAge(row.dob)}</TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -234,6 +234,7 @@ const Table: React.FC<ITable> = ({ rows }) => {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 10, 20]}
         />
       </Paper>
     </Box>

@@ -2,13 +2,45 @@ import * as React from "react";
 
 import { EPlayerType, TPlayer } from "../types/players";
 import { Grid, debounce } from "@mui/material";
+import {
+  LOCAL_STORAGE_FILTERS_KEY,
+  LOCAL_STORAGE_PLAYERS_MAP_KEY,
+} from "../utils/constants";
+import Table, { HeadCell } from "../components/Table";
 
 import Box from "@mui/material/Box";
 import Filter from "../components/Filter";
 import Search from "../components/Search";
-import Table from "../components/Table";
 import getPlayers from "../services/players";
 import useLocalStorage from "../hooks/useLocalStorage";
+
+const headCells: readonly HeadCell[] = [
+  {
+    id: "name",
+    numeric: false,
+    label: "Name",
+  },
+  {
+    id: "type",
+    numeric: false,
+    label: "Type",
+  },
+  {
+    id: "points",
+    numeric: true,
+    label: "Points",
+  },
+  {
+    id: "rank",
+    numeric: true,
+    label: "Rank",
+  },
+  {
+    id: "dob",
+    numeric: true,
+    label: "Age",
+  },
+];
 
 type Filters = {
   name: string;
@@ -17,9 +49,19 @@ type Filters = {
 
 const PlayersList: React.FC = () => {
   const [players, setPlayers] = React.useState<TPlayer[]>([]);
+  const [originalListOfPlayers, setOriginalListOfPlayers] = React.useState<TPlayer[]>([]);
   const [filters, setFilters] = useLocalStorage<Filters>(
-    "cricketers-app-filters",
+    LOCAL_STORAGE_FILTERS_KEY,
     { type: EPlayerType.ALL, name: "" } as Filters
+  );
+  const [playersMap, setPlayersMap] = useLocalStorage(
+    LOCAL_STORAGE_PLAYERS_MAP_KEY,
+    {} as {
+      [key: string]: {
+        player: TPlayer;
+        similarPlayers: TPlayer[];
+      };
+    }
   );
 
   const updateListBasedOnFilters = React.useCallback(
@@ -37,6 +79,7 @@ const PlayersList: React.FC = () => {
 
   const fetchPlayers = React.useCallback(() => {
     getPlayers({}).then((res) => {
+      setOriginalListOfPlayers(res);
       updateListBasedOnFilters(res);
     });
   }, [updateListBasedOnFilters]);
@@ -63,6 +106,22 @@ const PlayersList: React.FC = () => {
     [filters, setFilters, updateListBasedOnFilters]
   );
 
+  const selectPlayer = React.useCallback(
+    (player: TPlayer) => {
+      const similarPlayers = originalListOfPlayers.filter(
+        ({ type, id }) => type === player.type && id !== player.id
+      );
+      setPlayersMap({
+        ...playersMap,
+        [player.id]: {
+          player,
+          similarPlayers,
+        },
+      });
+    },
+    [originalListOfPlayers, playersMap, setPlayersMap]
+  );
+
   return (
     <Box padding={2}>
       <Grid
@@ -82,7 +141,7 @@ const PlayersList: React.FC = () => {
           <Filter type={filters.type} setType={setType} />
         </Grid>
       </Grid>
-      <Table rows={players} />
+      <Table rows={players} headCells={headCells} selectRow={selectPlayer} />
     </Box>
   );
 };
