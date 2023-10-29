@@ -19,7 +19,7 @@ const Filter: React.FC<IFilter> = ({ type, setType}) => {
   };
 
   return (
-    <FormControl sx={{ width: 180 }}>
+    <FormControl fullWidth>
       <InputLabel id="demo-simple-select-label">Filter by type</InputLabel>
       <Select
         labelId="demo-simple-select-label"

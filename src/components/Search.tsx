@@ -13,7 +13,7 @@ interface IComboxBox {
 const Search: React.FC<IComboxBox> = ({ name, options, setName }) => {
   return (
     <Autocomplete
-      sx={{ width: 200 }}
+      fullWidth
       id="free-solo-demo"
       freeSolo
       open={false}

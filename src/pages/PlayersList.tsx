@@ -1,12 +1,12 @@
 import * as React from "react";
 
 import { EPlayerType, TPlayer } from "../types/players";
+import { Grid, debounce } from "@mui/material";
 
 import Box from "@mui/material/Box";
 import Filter from "../components/Filter";
 import Search from "../components/Search";
 import Table from "../components/Table";
-import { debounce } from "@mui/material";
 import getPlayers from "../services/players";
 import useLocalStorage from "../hooks/useLocalStorage";
 
@@ -65,14 +65,24 @@ const PlayersList: React.FC = () => {
 
   return (
     <Box padding={2}>
-      <Box display="flex" justifyContent="space-between" marginBottom={2}>
-        <Search
-          name={filters.name}
-          options={players}
-          setName={debounceSetName}
-        />
-        <Filter type={filters.type} setType={setType} />
-      </Box>
+      <Grid
+        container
+        spacing={2}
+        marginBottom={2}
+        justifyContent="space-between"
+      >
+        <Grid item xs={12} sm={4}>
+          <Search
+            name={filters.name}
+            options={players}
+            setName={debounceSetName}
+          />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Filter type={filters.type} setType={setType} />
+        </Grid>
+      </Grid>
+
       <Table rows={players} />
     </Box>
   );

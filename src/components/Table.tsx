@@ -11,6 +11,7 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import { getAge } from "../utils/methods";
 import { playerTypeMap } from "../utils/constants";
 import { visuallyHidden } from "@mui/utils";
 
@@ -204,7 +205,7 @@ const Table: React.FC<ITable> = ({ rows }) => {
                     <TableCell align="left">{playerTypeMap[row.type]}</TableCell>
                     <TableCell align="right">{row.points}</TableCell>
                     <TableCell align="right">{row.rank}</TableCell>
-                    <TableCell align="right">{row.dob}</TableCell>
+                    <TableCell align="right">{getAge(row.dob)}</TableCell>
                   </TableRow>
                 );
               })}
